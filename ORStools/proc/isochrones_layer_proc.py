@@ -62,6 +62,8 @@ class ORSisochronesLayerAlgo(QgsProcessingAlgorithm):
     IN_PROFILE = "INPUT_PROFILE"
     IN_METRIC = 'INPUT_METRIC'
     IN_RANGES = 'INPUT_RANGES'
+    IN_INTERVAL = 'INPUT_INTERVAL'
+    IN_SMOOTH = 'INPUT_SMOOTHING'
     IN_KEY = 'INPUT_APIKEY'
     IN_DIFFERENCE = 'INPUT_DIFFERENCE'
     OUT = 'OUTPUT'
@@ -134,6 +136,22 @@ class ORSisochronesLayerAlgo(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
+            QgsProcessingParameterString(
+                name=self.IN_INTERVAL,
+                description="Interval range in seconds or meters",
+                optional=True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterString(
+                name=self.IN_SMOOTH,
+                description="Applies a level of generalisation to the isochrone polygons generated as a smoothing_factor between 0 and 100.0",
+                optional=True
+            )
+        )
+
+        self.addParameter(
             QgsProcessingParameterFeatureSink(
                 name=self.OUT,
                 description="Isochrones",
@@ -195,6 +213,13 @@ class ORSisochronesLayerAlgo(QgsProcessingAlgorithm):
         ranges_raw = self.parameterAsString(parameters, self.IN_RANGES, context)
         ranges_proc = [x * factor for x in map(int, ranges_raw.split(','))]
         params['range'] = ranges_proc
+
+        interval_raw = self.parameterAsString(parameters, self.IN_INTERVAL, context)
+        if interval_raw:
+            params['interval'] = interval_raw
+        smoothing_raw = self.parameterAsString(parameters, self.IN_SMOOTH, context)
+        if smoothing_raw:
+            params['smoothing'] = smoothing_raw
 
         # self.difference = self.parameterAsBool(parameters, self.IN_DIFFERENCE, context)
         source = self.parameterAsSource(parameters, self.IN_POINTS, context)

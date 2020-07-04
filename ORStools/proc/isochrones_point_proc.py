@@ -59,6 +59,8 @@ class ORSisochronesPointAlgo(QgsProcessingAlgorithm):
     IN_PROFILE = "INPUT_PROFILE"
     IN_METRIC = 'INPUT_METRIC'
     IN_RANGES = 'INPUT_RANGES'
+    IN_INTERVAL = 'INPUT_INTERVAL'
+    IN_SMOOTH = 'INPUT_SMOOTHING'
     IN_KEY = 'INPUT_APIKEY'
     IN_DIFFERENCE = 'INPUT_DIFFERENCE'
     OUT = 'OUTPUT'
@@ -112,6 +114,22 @@ class ORSisochronesPointAlgo(QgsProcessingAlgorithm):
                 name=self.IN_RANGES,
                 description="Comma-separated ranges [mins or m]",
                 defaultValue="5, 10"
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterString(
+                name=self.IN_INTERVAL,
+                description="Interval range in seconds or meters",
+                optional=True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterString(
+                name=self.IN_SMOOTH,
+                description="Applies a level of generalisation to the isochrone polygons generated as a smoothing_factor between 0 and 100.0",
+                optional=True
             )
         )
 
@@ -177,6 +195,13 @@ class ORSisochronesPointAlgo(QgsProcessingAlgorithm):
         ranges_raw = self.parameterAsString(parameters, self.IN_RANGES, context)
         ranges_proc = [x * factor for x in map(int, ranges_raw.split(','))]
         params['range'] = ranges_proc
+
+        interval_raw = self.parameterAsString(parameters, self.IN_INTERVAL, context)
+        if interval_raw:
+            params['interval'] = interval_raw
+        smoothing_raw = self.parameterAsString(parameters, self.IN_SMOOTH, context)
+        if smoothing_raw:
+            params['smoothing'] = smoothing_raw
 
         point = self.parameterAsPoint(parameters, self.IN_POINT, context, self.crs_out)
 
